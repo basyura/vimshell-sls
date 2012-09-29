@@ -31,20 +31,62 @@ let s:command = {
       \ 'description' : 'sls [{argument}...]',
       \}
 
+function! vimshell#commands#sls#define()
+  return s:command
+endfunction
+
 function! s:command.execute(args, context)
-  
-  let files = []
-  for file in split(glob("*"))
-    call add(files, isdirectory(file) ? file . '/' : file)
-  endfor
+  let files = map(split(glob("*"), ''), 
+                 \'isdirectory(v:val) ? v:val . "/" : v:val')
+
   if len(a:args) != 0 && a:args[0] == '-la'
-    call append(line("."), files)
+    call s:la(files)
   else
-    call append(line("."), join(files, ' '))
+    call s:ls(files)
   endif
   execute "normal G"
 endfunction
 
-function! vimshell#commands#sls#define()
-  return s:command
+function! s:ls(files)
+  let files = a:files
+  let max = max(map(copy(files), 'len(v:val)')) + 2
+  let ret = join(files, '  ')
+  if len(ret) < winwidth(0)
+    call append(line("."), ret)
+    return
+  else
+    let ret = ''
+  endif
+
+  for f in files
+    let f = s:ljust(f, max)
+    if len(ret) + len(f) > winwidth(0)
+      call append(line("."), ret)
+      let ret = f
+    else
+      let ret .= f
+    endif
+  endfor
+  call append(line("."), ret)
 endfunction
+
+function! s:la(files)
+  let files = a:files
+  let max = max(map(copy(files), 'len(v:val)')) + 2
+  for f in files
+    let line = s:ljust(f, max) . strftime("%Y.%m.%d %T", getftime(f))
+    if !isdirectory(f)
+      let line .=  '  ' . getfsize(f)
+    endif
+    call append(line("."), line)
+  endfor
+endfunction
+
+function! s:ljust(s, max)
+  let s = a:s
+  while len(s) < a:max
+    let s .= ' '
+  endwhile
+  return s
+endfunction
+
