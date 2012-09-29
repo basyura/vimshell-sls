@@ -49,30 +49,33 @@ endfunction
 
 function! s:ls(files)
   let files = a:files
-  let max = max(map(copy(files), 'len(v:val)')) + 2
+  let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
   let ret = join(files, '  ')
-  if len(ret) < winwidth(0)
+  if strdisplaywidth(ret) < winwidth(0)
     call append(line("."), ret)
     return
   else
     let ret = ''
   endif
 
+  let list = []
+
   for f in files
     let f = s:ljust(f, max)
-    if len(ret) + len(f) > winwidth(0)
-      call append(line("."), ret)
+    if strdisplaywidth(ret) + strdisplaywidth(f) > winwidth(0)
+      call add(list, ret)
       let ret = f
     else
       let ret .= f
     endif
   endfor
-  call append(line("."), ret)
+  call add(list, ret)
+  call append(line("."), list)
 endfunction
 
 function! s:la(files)
   let files = a:files
-  let max = max(map(copy(files), 'len(v:val)')) + 2
+  let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
   for f in files
     let line = s:ljust(f, max) . strftime("%Y.%m.%d %T", getftime(f))
     if !isdirectory(f)
@@ -84,7 +87,7 @@ endfunction
 
 function! s:ljust(s, max)
   let s = a:s
-  while len(s) < a:max
+  while strdisplaywidth(s) < a:max
     let s .= ' '
   endwhile
   return s
