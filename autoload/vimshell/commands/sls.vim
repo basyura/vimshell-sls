@@ -76,13 +76,15 @@ endfunction
 function! s:la(files)
   let files = a:files
   let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
+  let list = []
   for f in files
     let line = s:ljust(f, max) . strftime("%Y.%m.%d %T", getftime(f))
     if !isdirectory(f)
       let line .=  '  ' . getfsize(f)
     endif
-    call append(line("."), line)
+    call add(list, line)
   endfor
+  call append(line("."), list)
 endfunction
 
 function! s:ljust(s, max)
