@@ -63,13 +63,13 @@ function! s:ls(files)
   for f in files
     let f = s:ljust(f, max)
     if strdisplaywidth(ret) + strdisplaywidth(f) > winwidth(0)
-      call add(list, ret)
+      call add(list, s:trim_tail(ret))
       let ret = f
     else
       let ret .= f
     endif
   endfor
-  call add(list, ret)
+  call add(list, s:trim_tail(ret))
   call append(line("."), list)
 endfunction
 
@@ -93,5 +93,9 @@ function! s:ljust(s, max)
     let s .= ' '
   endwhile
   return s
+endfunction
+
+function! s:trim_tail(msg)
+  return substitute(a:msg, '\s\+$', '', '')
 endfunction
 
