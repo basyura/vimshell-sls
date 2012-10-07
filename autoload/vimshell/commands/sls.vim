@@ -36,13 +36,14 @@ function! vimshell#commands#sls#define()
 endfunction
 
 function! s:command.execute(args, context)
-  let files = map(split(glob("*"), ''), 
+
+  let isla = len(a:args) != 0 && a:args[0] == '-la' ? 1 : 0
+  let exp  = isla ? '.*\|*' : '*'
+
+  let files = map(split(glob(exp), '\n'), 
                  \'isdirectory(v:val) ? v:val . "/" : v:val')
 
-  if len(a:args) != 0 && a:args[0] == '-la'
-    let files = extend(files, 
-                    \ map(split(glob(".*"), ''), 
-                    \'isdirectory(v:val) ? v:val . "/" : v:val'))
+  if isla
     call s:la(files)
   else
     call s:ls(files)
@@ -51,7 +52,7 @@ function! s:command.execute(args, context)
 endfunction
 
 function! s:ls(files)
-  let files = sort(a:files)
+  let files = a:files
   let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
   let ret = join(files, '  ')
   if strdisplaywidth(ret) < winwidth(0)
@@ -77,7 +78,7 @@ function! s:ls(files)
 endfunction
 
 function! s:la(files)
-  let files = sort(a:files)
+  let files = a:files
   let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
   let list = []
   for f in files
