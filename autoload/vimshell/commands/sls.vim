@@ -40,6 +40,9 @@ function! s:command.execute(args, context)
                  \'isdirectory(v:val) ? v:val . "/" : v:val')
 
   if len(a:args) != 0 && a:args[0] == '-la'
+    let files = extend(files, 
+                    \ map(split(glob(".*"), ''), 
+                    \'isdirectory(v:val) ? v:val . "/" : v:val'))
     call s:la(files)
   else
     call s:ls(files)
@@ -48,7 +51,7 @@ function! s:command.execute(args, context)
 endfunction
 
 function! s:ls(files)
-  let files = a:files
+  let files = sort(a:files)
   let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
   let ret = join(files, '  ')
   if strdisplaywidth(ret) < winwidth(0)
@@ -74,7 +77,7 @@ function! s:ls(files)
 endfunction
 
 function! s:la(files)
-  let files = a:files
+  let files = sort(a:files)
   let max = max(map(copy(files), 'strdisplaywidth(v:val)')) + 2
   let list = []
   for f in files
